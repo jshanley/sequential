@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en" ng-app="sequential">
+<head>
+	<meta charset="UTF-8">
+	<title>Sequential</title>
+	<link rel="stylesheet" href="./styles/style.css">
+	<link rel="stylesheet" href="./styles/fontello.css">
+</head>
+<body ng-controller="MainCtrl">
+
+	<div class="sidebar">
+		<h1>sequential</h1>
+		<div class="button-group">
+			<button ng-click="startPlayback()"><i class="icon-play"></i></button>
+			<button ng-click="pausePlayback()"><i class="icon-pause"></i></button>
+			<button ng-click="stopPlayback()"><i class="icon-stop"></i></button>
+		</div>
+		<div class="labeled-input">
+			<label for="input-tempo">Tempo</label>
+			<input name="input-tempo" ng-model="userInput.tempo" type="number" min="20" max="400" />
+		</div>
+		<div class="labeled-input">
+			<label for="input-beats">Beats</label>
+			<input name="input-beats" ng-model="userInput.beats" type="number" min="1" max="8" ng-change="resetGridData()" />			
+		</div>
+		<div class="labeled-input">
+			<label for="input-subdivisions">Subdivisions</label>
+			<input name="input-subdivisions" ng-model="userInput.subdivisions" type="number" min="1" max="8" ng-change="resetGridData()" />
+		</div>
+		<div class="instrument-list">
+			<header>Instruments</header>
+			<ul>
+				<li ng-repeat="instrument in availableInstruments"
+				class="{{instrument.selected && 'instrument selected' || 'instrument'}}"
+				ng-click="instrument.selected = !instrument.selected">{{instrument.name}}</li>
+			</ul>
+		</div>
+	</div>
+
+	<div id="view">
+		<div class="counters">
+			<span class="beat-counter">{{currentMarks.beat}}</span>
+		</div>
+		<div class="{{getBeatClass($index + 1)}}"
+			ng-repeat="beat in getNumber(userInput.beats)"
+			data-beat="{{$index + 1}}">
+			<div class="beat-label">{{$index + 1}}</div>
+			<div class="beat-inner">
+				<div class="block-group"
+					ng-repeat="instrument in availableInstruments | filter: { selected: true }"
+					data-instrument-name="{{instrument.name}}">
+					<div class="block-wrapper"
+						ng-repeat="block in instrument.blocks | filter: { beat: $parent.$index + 1 }"
+						data-beat="{{block.beat}}"
+						data-subdivision="{{block.subdivision}}"
+						data-instrument-name="{{instrument.name}}"
+						ng-mouseover="block.hovered = true"
+						ng-mouseout="block.hovered = false">
+						<div class="{{getBlockClass(block)}}"
+							ng-click="block.active = !block.active; block.velocity = 4"></div>
+						<div class="block-velocity up"
+							ng-show="showHideVelocityControls(block)"
+							ng-click="block.velocity = block.velocity < 8 && block.velocity + 1 || block.velocity;">▲</div>
+						<div class="block-velocity down"
+							ng-show="showHideVelocityControls(block)"
+							ng-click="block.velocity = block.velocity > 0 && block.velocity - 1 || block.velocity">▼</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<script src="./components/jquery/jquery.min.js"></script>
+	<script src="./components/angular/angular.min.js"></script>
+	<script src="./scripts/app.js"></script>
+</body>
+</html>
